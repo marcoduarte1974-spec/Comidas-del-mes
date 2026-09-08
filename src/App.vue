@@ -100,6 +100,10 @@ export default {
       selectedDay.value = null
     }
 
+    function selectDay(day) {
+      selectedDay.value = day
+    }
+
     return {
       currentYear,
       currentMonth,
@@ -109,7 +113,8 @@ export default {
       addMeal,
       deleteMeal,
       prevMonth,
-      nextMonth
+      nextMonth,
+      selectDay
     }
   }
 }
