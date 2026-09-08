@@ -6,6 +6,13 @@
       <button @click="$emit('next-month')" class="btn-nav">Siguiente →</button>
     </div>
 
+    <!-- DEBUG: Muestra información del calendario -->
+    <div class="debug-info">
+      <p>Hoy: {{ todayInfo }}</p>
+      <p>Primer día mes: {{ firstDayInfo }}</p>
+      <p>Espacios vacíos: {{ firstDayOfMonth }}</p>
+    </div>
+
     <div class="calendar">
       <!-- Encabezados de días de la semana -->
       <div class="weekday" v-for="day in weekdays" :key="day">
@@ -48,6 +55,7 @@ export default {
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ]
+    const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
     const monthName = computed(() => monthNames[props.month])
 
@@ -57,12 +65,20 @@ export default {
 
     const firstDayOfMonth = computed(() => {
       const first = new Date(props.year, props.month, 1)
-      // JavaScript: 0=domingo, 1=lunes, 2=martes...
-      // Nosotros queremos: 0=lunes, 1=martes...
-      // Entonces restamos 1 y si es domingo (-1), lo convertimos a 6
-      let day = first.getDay() - 1
-      if (day < 0) day = 6
-      return day
+      // getDay: 0=domingo, 1=lunes, 2=martes, ..., 6=sábado
+      // Queremos: 0=lunes, 1=martes, ..., 6=domingo
+      // Fórmula: (getDay() - 1 + 7) % 7
+      return (first.getDay() - 1 + 7) % 7
+    })
+
+    const todayInfo = computed(() => {
+      const today = new Date()
+      return `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} (${dayNames[today.getDay()]})`
+    })
+
+    const firstDayInfo = computed(() => {
+      const first = new Date(props.year, props.month, 1)
+      return `${dayNames[first.getDay()]} (getDay=${first.getDay()})`
     })
 
     function isToday(day) {
@@ -87,6 +103,7 @@ export default {
     }
 
     function selectDay(day) {
+      console.log('Click en día:', day)
       emit('select-day', day)
     }
 
@@ -98,7 +115,9 @@ export default {
       isToday,
       hasMeals,
       getMealCount,
-      selectDay
+      selectDay,
+      todayInfo,
+      firstDayInfo
     }
   }
 }
@@ -126,6 +145,20 @@ export default {
   text-align: center;
   flex: 1;
   min-width: 150px;
+}
+
+.debug-info {
+  background: #fffacd;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  color: #333;
+  border: 1px solid #ffd700;
+}
+
+.debug-info p {
+  margin: 4px 0;
 }
 
 .btn-nav {
@@ -243,6 +276,11 @@ export default {
   .month-year {
     font-size: 1.2rem;
     width: 100%;
+  }
+
+  .debug-info {
+    font-size: 0.75rem;
+    padding: 8px;
   }
 
   .day {
