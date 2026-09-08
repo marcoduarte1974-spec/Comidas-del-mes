@@ -12,6 +12,9 @@
         {{ day }}
       </div>
 
+      <!-- Espacios vacíos al inicio del mes -->
+      <div v-for="_ in firstDayOfMonth" :key="'empty-' + _" class="empty"></div>
+
       <!-- Días del mes -->
       <div 
         v-for="day in daysInMonth" 
@@ -24,9 +27,6 @@
           {{ getMealCount(day) }} 🍽️
         </div>
       </div>
-
-      <!-- Espacios vacíos al inicio del mes -->
-      <div v-for="_ in firstDayOfMonth" :key="'empty-' + _" class="empty"></div>
     </div>
   </div>
 </template>
@@ -57,7 +57,11 @@ export default {
 
     const firstDayOfMonth = computed(() => {
       const first = new Date(props.year, props.month, 1)
-      return (first.getDay() + 6) % 7 // Ajusta para que lunes sea 0
+      // getDay() devuelve 0 para domingo, necesitamos 0 para lunes
+      // Entonces: domingo=6, lunes=0, martes=1, etc.
+      let day = first.getDay() - 1
+      if (day < 0) day = 6
+      return day
     })
 
     function isToday(day) {
