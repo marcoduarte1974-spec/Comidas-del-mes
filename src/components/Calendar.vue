@@ -20,7 +20,7 @@
         v-for="day in daysInMonth" 
         :key="day"
         :class="['day', { 'today': isToday(day), 'has-meals': hasMeals(day) }]"
-        @click="$emit('select-day', day)"
+        @click="selectDay(day)"
       >
         <div class="day-number">{{ day }}</div>
         <div class="meal-count" v-if="hasMeals(day)">
@@ -42,7 +42,7 @@ export default {
     meals: Object
   },
   emits: ['prev-month', 'next-month', 'select-day'],
-  setup(props) {
+  setup(props, { emit }) {
     const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab', 'Dom']
     const monthNames = [
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -57,8 +57,9 @@ export default {
 
     const firstDayOfMonth = computed(() => {
       const first = new Date(props.year, props.month, 1)
-      // getDay() devuelve 0 para domingo, necesitamos 0 para lunes
-      // Entonces: domingo=6, lunes=0, martes=1, etc.
+      // JavaScript: 0=domingo, 1=lunes, 2=martes...
+      // Nosotros queremos: 0=lunes, 1=martes...
+      // Entonces restamos 1 y si es domingo (-1), lo convertimos a 6
       let day = first.getDay() - 1
       if (day < 0) day = 6
       return day
@@ -85,6 +86,10 @@ export default {
       return props.meals[key] ? props.meals[key].length : 0
     }
 
+    function selectDay(day) {
+      emit('select-day', day)
+    }
+
     return {
       weekdays,
       monthName,
@@ -92,7 +97,8 @@ export default {
       firstDayOfMonth,
       isToday,
       hasMeals,
-      getMealCount
+      getMealCount,
+      selectDay
     }
   }
 }
@@ -164,12 +170,21 @@ export default {
   justify-content: center;
   transition: all 0.3s ease;
   min-height: 80px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .day:hover {
   background: #e8e8ff;
   border-color: #667eea;
   transform: translateY(-2px);
+}
+
+.day:active {
+  transform: translateY(0);
+  background: #d0d8ff;
 }
 
 .day.today {
